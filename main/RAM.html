@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Rapid-Alternating Movements(Dysdiadochokinesis)</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+        </style>
+    </head>
+    <body>
+        <ul id="nav">
+            <li class="current"><a href="index.html">Home</a></li>
+            
+            <li><a href="#">Postural Tremor Detection</a>
+                <ul>
+                    <li><a href="postural_1.html">Task One</a></li>
+                    <li><a href="postural_2.html">Task Two</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Action Tremor Detection</a>
+                <ul>
+                    <li><a href="action_lines.html">Draw Lines</a></li>
+                    <li><a href="action_circle.html">Draw Circle</a></li>
+                    <li><a href="action_square.html">Draw Square</a></li>
+                    <li><a href="action_spiral.html">Draw Spiral</a></li>
+                </ul>
+            </li>
+            <li><a href="RAM.html">Rapid-Alternating Movements/Dysdiadochokinesis</a></li>
+        </ul>
+        <input type=button value="Start" id="btn" style="position: absolute; left: 250px; top: 200px; " onclick="recordData(15)" />
+        <canvas id="title" width=900 height=100>
+        </canvas>
+
+<script src="../three.js"></script>
+<script src="../leap.js"></script>
+<script>
+
+    var camera, scene, renderer;
+    var geometry, material, mesh;
+    //var fullcycle=0,nonfullcycle=0;
+    var initialangle=null;
+	var logleap=0;var countcycle=false;
+    /*
+    var text = document.createElement('div');
+    text.style.position = 'absolute';
+    text.style.backgroundColor = 'white';
+    text.style.borderRadius = "5px";
+    text.style.padding = "0px 20px";
+    text.style.left = "100px";
+    text.style.top = "100px";
+    */
+    drawInstruction();
+    init();
+    animate();
+    
+    function drawInstruction(){
+        var c=document.getElementById("title");
+        var ctx=c.getContext("2d");
+        ctx.font="12pt Arial Black";
+        ctx.fillStyle="orange";
+        ctx.lineWidth=5;
+        ctx.fillText("Rapid-Alternating Movements (Dysdiadochokinesis) Detection:",200,60);
+        ctx.font="15pt Arial Black";
+	    ctx.fillStyle="maroon";
+        ctx.lineWidth=5;
+        ctx.fillText("Turn the plane clockwise and anti-clockwise (15-20secs)",200,90);
+    }
+
+    function init() {
+        camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+        camera.position.x=window.innerWidth/2;
+        camera.position.y = -450;
+        camera.position.z = 500;
+        camera.rotation.x = Math.PI/4;//offset
+        
+        scene = new THREE.Scene();
+        
+        geometry = new THREE.CubeGeometry(600,600,10);
+        material = [new THREE.MeshBasicMaterial({color:"black"}),
+                    new THREE.MeshBasicMaterial({color:"black"}),
+                    new THREE.MeshBasicMaterial({color:"black"}),
+                    new THREE.MeshBasicMaterial({color:"black"}),
+                    new THREE.MeshBasicMaterial({color:"orange"}),
+                    new THREE.MeshBasicMaterial({color:"maroon"})];
+        
+        mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial(material) );
+        scene.add( mesh );
+        mesh.position=new THREE.Vector3(window.innerWidth/2,700,-100);
+
+        renderer = new THREE.CanvasRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        
+        document.body.appendChild( renderer.domElement );
+        
+    }
+
+function animate() {
+    var rotcycle=0;
+    // note: three.js includes requestAnimationFrame shim
+    requestAnimationFrame( animate );
+    //var PrevFrame=null;
+    Leap.loop(function(frame){
+              //if (!PrevFrame && frame.valid){PrevFrame=frame;}
+              if (frame.hands.length>0){
+              
+              //mesh.position=new THREE.Vector3(window.innerWidth/2,700,-100);
+              var palm = frame.hands[0];
+              //var rotY = palm._rotation[1];
+              
+              var rotY=-palm.roll();
+               mesh.rotation.y=rotY;
+               
+                            //text.innerHTML = ""+rotY;
+              //document.body.appendChild(text);
+              }
+              /*
+              if (countcycle==true){
+              if(Math.abs(relative_rotY)>=Math.abs(rotcycle)&&Math.abs(relative_rotY+rotcycle)>Math.abs(rotcycle)){rotcycle+=relative_rotY;}
+              else if (){}
+               */
+              //PrevFrame=frame;
+              });
+              renderer.render( scene, camera );
+              
+}
+
+function sendflag(data){
+    //send flag message by ajax call
+    //logleap=1;
+    var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+    xmlhttp.open("POST","http://localhost:8000", "/json-handler");
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.send(JSON.stringify(data));
+}
+//countdown
+function countdown(secs) {
+    var initial=secs;
+    var btn = document.getElementById('btn');
+    btn.value = secs+" seconds";
+    --secs;
+	var timer = setTimeout('countdown('+secs+')',1000);
+    
+    if(secs < 0) {
+		clearTimeout(timer);
+		btn.value = 'Restart';
+        secs=initial;
+        logleap=0;
+        sendflag(logleap);
+		//alert("This trial has "+fullcycle+" full cycles. And "+nonfullcycle+" are not full cycles.");
+		//fullcycle=0;
+		//nonfullcycle=0;
+        countcycle=false;
+	}
+}
+
+function recordData(secs){
+    //countcycle=true;
+    //init();
+    logleap=1;
+    animate();
+    sendflag(logleap);
+    countdown(secs);
+}
+    </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Leap Motion Tremor Detection</title>
+               <link href="style.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+    <input type=button value="Click to Start" id="btn" style="position: absolute; left: 10%; top: 82%; " onclick="window.location='postural_1.html';" />
+    <input type=button value="Click to Start" id="btn" style="position: absolute; left: 43.5%; top: 82%; " onclick="window.location='action_lines.html';" />
+    <input type=button value="Click to Start" id="btn" style="position: absolute; left: 77.5%; top: 82%; " onclick="window.location='RAM.html';" />
+    
+<canvas id="myCanvas" style="border:5px solid orange">
+
+</canvas>
+<script src="../leap.js"></script>
+<script>
+var c=document.getElementById("myCanvas");
+//resize window
+window.addEventListener('resize', resizeCanvas, false);
+
+function resizeCanvas() {
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+    drawTitle();
+    drawInstructionPostural();
+    drawInstructionAction();
+    drawInstructionRAM();
+}
+resizeCanvas();
+
+function drawTitle(){
+    var ctx=c.getContext("2d");
+    ctx.font="bold 20pt Century Gothic";
+    ctx.fillStyle="maroon";
+    //ctx.lineWidth=1;
+    ctx.fillText("Multiple-Type Tremor Detection",c.width/4,c.height/16+10);
+    //ctx.font="bold 20pt Century Gothic";
+    ctx.strokeStyle="maroon";
+    ctx.lineWidth=1;
+    ctx.strokeText("with Leap Motion",c.width/4+425,c.height/16+10);
+    var border=c.getContext("2d");
+    border.strokeStyle="orange";
+    border.lineWidth=10;
+    /*
+    //left border
+    border.beginPath();
+    border.arc(c.width/3,135,10,0,2*Math.PI);
+    border.stroke();
+    border.beginPath();
+    border.moveTo(c.width/3,140);
+    border.lineTo(c.width/3,545);
+    border.stroke();
+    border.beginPath();
+    border.arc(c.width/3,550,10,0,2*Math.PI);
+    border.stroke();
+    //right border
+    border.beginPath();
+    border.arc(c.width*2/3-20,135,10,0,2*Math.PI);
+    border.stroke();
+    border.beginPath();
+    border.moveTo(c.width*2/3-20,140);
+    border.lineTo(c.width*2/3-20,545);
+    border.stroke();
+    border.beginPath();
+    border.arc(c.width*2/3-20,550,10,0,2*Math.PI);
+    border.stroke();
+     */
+    //top border
+    border.beginPath();
+    border.arc(20,c.height/8,10,0,2*Math.PI);
+    border.stroke();
+    border.beginPath();
+    border.moveTo(25,c.height/8);
+    border.lineTo(c.width-25,c.height/8);
+    border.stroke();
+    border.beginPath();
+    border.arc(c.width-20,c.height/8,10,0,2*Math.PI);
+    border.stroke();
+    //bottom border
+    border.beginPath();
+    border.arc(20,c.height*6/7,10,0,2*Math.PI);
+    border.stroke();
+    border.beginPath();
+    border.moveTo(25,c.height*6/7);
+    border.lineTo(c.width-25,c.height*6/7);
+    border.stroke();
+    border.beginPath();
+    border.arc(c.width-20,c.height*6/7,10,0,2*Math.PI);
+    border.stroke();
+
+}
+
+//"draw" the instruction
+function drawInstructionPostural(){
+    var postural=c.getContext("2d");
+    postural.font="bold 15pt Century Gothic";
+    postural.fillStyle="maroon";
+    postural.lineWidth=5;
+    postural.fillText("Postural Tremor Detection",c.width/15,c.height/5);
+    var img=new Image();
+    img.src="postural_1.jpg";
+    postural.drawImage(img,0,c.height/3,c.width/3-5,200);
+
+	}
+
+//"draw" the instruction
+function drawInstructionAction(){
+    var action=c.getContext("2d");
+    action.font="bold 15pt Century Gothic";
+    action.fillStyle="maroon";
+    action.fillText("Action Tremor Detection",c.width/3+75,c.height/5);
+    var centerx = c.width/2;
+    var centery = c.height/2-25;
+    var a=8, b=8;
+    var context=c.getContext("2d");
+    context.moveTo(centerx, centery);
+    context.beginPath();
+    for (i = 0; i < 160; i++) {
+        angle = 0.1 * i;
+        x = centerx + (a + b * angle) * Math.cos(angle);
+        y = centery + (a + b * angle) * Math.sin(angle);
+        context.lineTo(x, y);
+    }
+    context.strokeStyle="orange";
+    context.lineWidth=9;
+    context.stroke();
+    context.strokeStyle="maroon";
+    context.lineWidth=10;
+    context.beginPath();
+    context.arc(centerx,centery,10,0,2*Math.PI);
+    context.stroke();
+    context.strokeStyle="#03A89F";
+    context.lineWidth=10;
+    context.beginPath();
+    context.arc(x,y-25,10,0,2*Math.PI);
+    context.stroke();
+}
+
+//"draw" the instruction
+function drawInstructionRAM(){
+    var ram=c.getContext("2d");
+    ram.font="bold 15pt Century Gothic";
+    ram.fillStyle="maroon";
+    ram.fillText("Rapid-Altering Movements",c.width*2/3+70,c.height/5);
+    var img=new Image();
+    img.src="RAM.jpg";
+    ram.drawImage(img,c.width*2/3+20,c.height*2/7,c.width/3-20,250);
+        }
+
+    </script>
+</body>
+</html>

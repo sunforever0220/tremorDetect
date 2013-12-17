@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Postural Tremor Detection Task 2</title>
+        <link href="style.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <ul id="nav">
+            <li class="current"><a href="index.html">Home</a></li>
+            
+            <li><a href="#">Postural Tremor Detection</a>
+                <ul>
+                    <li><a href="postural_1.html">Task One</a></li>
+                    <li><a href="postural_2.html">Task Two</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Action Tremor Detection</a>
+                <ul>
+                    <li><a href="action_lines.html">Draw Lines</a></li>
+                    <li><a href="action_circle.html">Draw Circle</a></li>
+                    <li><a href="action_square.html">Draw Square</a></li>
+                    <li><a href="action_spiral.html">Draw Spiral</a></li>
+                </ul>
+            </li>
+            <li><a href="RAM.html">Rapid-Alternating Movements/Dysdiadochokinesis</a></li>
+        </ul>
+            
+<canvas id="myCanvas" style="border:5px solid orange">
+</canvas>
+<input type=button value="Start" id="btn" style="position: absolute; left:400px; top: 500px; " onclick="recordData(60)" />
+
+<script src="../leap.js"></script>
+<script>
+    var c=document.getElementById("myCanvas");
+    var logleap=0;
+    //initialization
+    var leftPerformance="",rightPerformance="",totalPerformance="";
+    var fingernoleft=0,fingernoright=0,framewrong=0,frameaccurate=0,totalframe=0;
+    //test performance:Accurate, Wrong, Adequate
+    //resize window
+//resize window
+window.addEventListener('resize', resizeCanvas, false);
+
+function resizeCanvas() {
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+    drawInstruction();
+    //draw palm
+    var palm=c.getContext("2d");
+   Leap.loop(function(frame){
+             
+             if (frame.hands===undefined){
+             var handslength=0;
+             leftPerformance="Wrong";
+             rightPerformance="Wrong";
+             totalPerformance="Wrong";
+             }
+             else{var handslength=frame.hands.length;}
+             palm.clearRect(0,0,c.width,c.height);
+             //draw instruction
+             drawInstruction();
+            //track fingers
+   for(var handId=0,handCount=handslength;handId!=handCount;handId++){
+             var hand = frame.hands[handId];
+             var xpos = 450+(hand.palmPosition[0]*3);
+             var ypos = 600-(hand.palmPosition[1]*3);
+             //draw palm
+             palm.lineWidth=10;
+             for(var i=1;i<=10;i++){
+             palm.strokeStyle="orange";
+             palm.beginPath();
+             palm.arc(xpos-50+Math.floor(100*Math.random()),ypos-50+Math.floor(100*Math.random()),8,0,2*Math.PI);//xpos,ypos,r,0,2PI
+             palm.stroke();
+             }
+             palm.strokeStyle="maroon";
+             palm.beginPath();
+             palm.arc(xpos,ypos,15,0,2*Math.PI);
+             palm.stroke();
+
+    //draw pointables
+    var finger=c.getContext("2d");
+             //finger.clearRect(0,0,900,900);
+             
+             for (var fingerId = 0; fingerId<hand.fingers.length; fingerId++) {
+             var fingertip = hand.fingers[fingerId];
+             var xpos = 450+(fingertip.stabilizedTipPosition[0]*3);
+             var ypos = 550-(fingertip.stabilizedTipPosition[1]*3);
+             finger.lineWidth=8;
+             finger.strokeStyle="maroon";
+             finger.beginPath();
+             finger.arc(xpos,ypos,20,0,2*Math.PI);
+             finger.stroke();
+             finger.fillStyle="orange";
+             finger.beginPath();
+             finger.arc(xpos,ypos,10,0,2*Math.PI);
+             finger.fill();
+             
+             }//end finger loop
+             var result=c.getContext("2d");
+             
+             if (handId==0){
+             fingernoleft=hand.fingers.length;
+             result.lineWidth=1;
+             result.strokeStyle="maroon";
+             result.strokeText(""+fingernoleft,1000,270);
+             //if each finger appears/disappears more than once within 50 millisecs, system performance wrong.
+             if(handslength==2&&hand.fingers.length==5){leftPerformance="Accurate";}
+             else if (handslength==2&&hand.fingers.length==4){leftPerformance="Adequate";}
+             else if (handslength!=2||hand.fingers.length<4)//need to be modified
+             {leftPerformance="Wrong";}
+             result.strokeText(""+leftPerformance,1000,390);
+             }//end hand1
+             else if (handId==1){
+             fingernoright=hand.fingers.length;
+             result.lineWidth=1;
+             result.strokeStyle="maroon";
+             result.strokeText(""+fingernoright,1000,300);
+             if(handslength==2&&hand.fingers.length==5){rightPerformance="Accurate";}
+             else if (handslength==2&&hand.fingers.length==4)
+             {rightPerformance="Adequate";}
+             else if (handslength!=2||hand.fingers.length<4)//need to be modified
+             {rightPerformance="Wrong";}
+             result.strokeText(""+rightPerformance,1000,420);
+             }//end hand2
+             
+             }//end palm loop
+             var result=c.getContext("2d");
+             result.lineWidth=1;
+             result.strokeStyle="maroon";
+             result.strokeText(""+handslength,1050,180);
+             if (logleap==1){
+             if (leftPerformance=="Accurate"&&rightPerformance=="Accurate"){
+             //totalPerformance="Accurate";
+             frameaccurate++;
+             }
+             else if (leftPerformance=="Wrong"||rightPerformance=="Wrong"){
+             //totalPerformance="Wrong";
+             framewrong++;
+             }
+             //else{totalPerformance="Fair";}
+             //result.strokeText(""+totalPerformance,980,450);
+             
+             totalframe++;
+             }//end loop logleap==1
+             });
+}
+resizeCanvas();
+
+//draw instruction
+function drawInstruction(){
+    var ctx=c.getContext("2d");
+    ctx.font="12pt Arial Black";
+    ctx.fillStyle="orange";
+    ctx.lineWidth=5;
+    ctx.fillText("Postural Tremor Detection:",c.width/10,60);
+    ctx.font="15pt Arial Black";
+    ctx.fillStyle="maroon";
+    ctx.lineWidth=5;
+    ctx.fillText("Hold Both Hands at a Position for 60 Seconds",c.width/10,90);
+    var img=new Image(); //creates a variable for a new image
+    img.src="postural_2.jpg";
+ctx.drawImage(img,0,130);
+//draw performance panel
+ctx.lineWidth=5;
+ctx.strokeStyle="orange";
+ctx.strokeRect(900,60,250,50);
+ctx.strokeRect(900,135,250,340);
+ctx.font="15pt Century Gothic";
+ctx.lineWidth=1;
+ctx.strokeStyle="maroon";
+ctx.strokeText("System Performance",915,90);
+ctx.strokeText("No.of Hands:",915,180);
+ctx.strokeText("No.of Fingers:",915,240);
+ctx.strokeText("Hand 1: ",915,270);
+ctx.strokeText("Hand 2: ",915,300);
+ctx.strokeText("Tracking Performance",915,360);
+ctx.strokeText("Hand 1: ",915,390);
+ctx.strokeText("Hand 2: ",915,420);
+ctx.strokeText("Total: ", 915, 450);
+
+}
+
+function sendflag(data){
+    //send flag message by ajax call
+    //logleap=1;
+    var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+    xmlhttp.open("POST","http://localhost:8000", "/json-handler");
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlhttp.send(JSON.stringify(data));
+}
+
+//countdown
+function countdown(secs) {
+    var initial=secs;
+    var btn = document.getElementById('btn');
+    btn.value = secs+" seconds";
+    --secs;
+	var timer = setTimeout('countdown('+secs+')',1000);
+    
+    if(secs < 0) {
+		clearTimeout(timer);
+		btn.value = 'Restart';
+        secs=initial;
+        var total=c.getContext("2d");
+        if(frameaccurate/totalframe>0.9){totalPerformance="Accurate";}
+        else if (framewrong/totalframe>0.1){totalPerformance="Wrong";}
+        else{totalPerformance="Adequate";}
+        total.strokeText(""+totalPerformance,980,450);
+        alert(""+Math.floor(frameaccurate/totalframe*100)+"% of frames are accurate and "+Math.floor(framewrong/totalframe*100)+"% of frames are wrong."+"\n"+"The total performance of this trial is: "+totalPerformance);
+        logleap=0;
+        sendflag(logleap);
+	}
+}
+
+function recordData(secs){
+    logleap=1;
+    sendflag(logleap);
+    resizeCanvas();
+    countdown(secs);
+}
+
+    </script>
+</body>
+</html>
