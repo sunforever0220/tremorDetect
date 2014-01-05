@@ -31,8 +31,17 @@ currentDir = process.cwd();
 
 
 port = process.argv[2] ? parseInt(process.argv[2], 0) : port;
-
-function handleRequest(request, response) {
+//added parts for Cross-Origin Resource Sharing (CORS) specification
+function handleOptions(request, response) {
+    response.writeHead(200, {
+                       "Access-Control-Allow-Origin": "*",
+                       "Access-Control-Allow-Method": "POST, GET, OPTIONS",
+                       "Access-Control-Allow-Headers": request.headers["access-control-request-headers"]
+                       });
+    response.end();
+}
+//function handleRequest
+function handlePost(request, response) {
     
     //probably here, otherwise in handle POST event
     //if URL is our magic start URL
@@ -111,6 +120,13 @@ function handleRequest(request, response) {
                        });
             }
             });
+}
+function handleRequest(request, response){
+    if(request.method == "POST") {
+    handlePost(request, response);
+} else if(request.method == "OPTIONS") {
+    handleOptions(request, response);
+}
 }
 
 http.createServer(handleRequest).listen(port);
